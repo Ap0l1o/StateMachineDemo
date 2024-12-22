@@ -1,9 +1,12 @@
 package org.com.statemachinedemo.service;
 
+import org.com.statemachinedemo.actions.OrderAction;
 import org.com.statemachinedemo.entity.Order;
 import org.com.statemachinedemo.enums.OrderEvent;
 import org.com.statemachinedemo.enums.OrderState;
 import org.com.statemachinedemo.enums.PaymentStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
@@ -19,6 +22,8 @@ public class OrderService {
     @Autowired
     private StateMachine<OrderState, OrderEvent> stateMachine;
     private final Map<String, Order> orderRepository = new HashMap<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     public Order getOrder(String orderId) {
         return orderRepository.get(orderId);
@@ -43,7 +48,7 @@ public class OrderService {
                     .build());
         } else {
             order.setPaymentStatus(PaymentStatus.FAILED);
-            System.out.println("支付失败");
+            logger.info("订单-{} 支付失败", order.getOrderId());
         }
     }
 
