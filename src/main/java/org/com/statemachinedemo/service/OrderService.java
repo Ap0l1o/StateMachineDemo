@@ -37,36 +37,35 @@ public class OrderService {
     // 处理支付
     public void processPayment(Order order, BigDecimal paymentAmount) {
         order.setPaymentAmount(paymentAmount);
-        order.setPaymentStatus(paymentAmount.equals(order.getTotalAmount())? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
-        if (order.getPaymentStatus() == PaymentStatus.SUCCESS) {
-            Map<String, Object> headers = new HashMap<>();
-            headers.put("order", order);
+        if (paymentAmount.equals(order.getTotalAmount())) {
             stateMachine.sendEvent(MessageBuilder.withPayload(OrderEvent.PAYMENT_CONFIRMED)
                     .setHeader("order", order)
                     .build());
         } else {
+            order.setPaymentStatus(PaymentStatus.FAILED);
             System.out.println("支付失败");
         }
     }
 
     // 安排发货
     public void arrangeShipment(Order order) {
-        stateMachine.sendEvent(OrderEvent.SHIPMENT_ARRANGED);
+        stateMachine.sendEvent(MessageBuilder.withPayload(OrderEvent.SHIPMENT_ARRANGED)
+                .setHeader("order", order)
+                .build());
     }
 
     // 完成配送
     public void completeDelivery(Order order) {
-        stateMachine.sendEvent(OrderEvent.DELIVERY_COMPLETED);
+        stateMachine.sendEvent(MessageBuilder.withPayload(OrderEvent.DELIVERY_COMPLETED)
+                .setHeader("order", order)
+                .build());
     }
 
     // 取消订单
     public void cancelOrder(Order order) {
-        stateMachine.sendEvent(OrderEvent.ORDER_CANCELLED);
-    }
-
-    // 获取订单当前状态
-    public OrderState getCurrentOrderState(Order order) {
-        return order.getState();
+        stateMachine.sendEvent(MessageBuilder.withPayload(OrderEvent.ORDER_CANCELLED)
+                .setHeader("order", order)
+                .build());
     }
 
     // 停止状态机（销毁资源）
