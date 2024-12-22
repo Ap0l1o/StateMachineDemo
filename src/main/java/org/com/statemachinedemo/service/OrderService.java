@@ -28,7 +28,6 @@ public class OrderService {
     public Order createOrder(BigDecimal totalAmount) {
         Order order = new Order(UUID.randomUUID().toString(), totalAmount);
         orderRepository.put(order.getOrderId(), order);
-
         // 启动状态机
         stateMachine.start();
 

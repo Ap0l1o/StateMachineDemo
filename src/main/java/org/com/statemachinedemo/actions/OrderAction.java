@@ -11,13 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 @WithStateMachine
 public class OrderAction {
-//    @Autowired
-//    private InventoryService inventoryService;
-//    @Autowired
-//    private ShippingService shippingService;
-//    @Autowired
-//    private PaymentService paymentService;
-
     // 支付成功处理
     @OnTransition(source = "PAYMENT_PENDING", target = "PAID")
     public void handlePaymentConfirmation(StateContext<OrderState, OrderEvent> context) {
@@ -29,8 +22,6 @@ public class OrderAction {
     @OnTransition(source = "PAID", target = "SHIPPED")
     public void shipOrder(StateContext<OrderState, OrderEvent> context) {
         Order order = (Order) context.getMessage().getHeaders().get("order");
-//        inventoryService.reduceStock(order.getOrderId());
-//        shippingService.shipOrder(order.getOrderId());
         System.out.println("订单已发货，库存已减少，发货流程已启动。");
     }
 
