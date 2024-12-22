@@ -4,9 +4,10 @@ import org.com.statemachinedemo.enums.OrderState;
 import org.com.statemachinedemo.enums.OrderEvent;
 import org.com.statemachinedemo.entity.Order;
 import org.com.statemachinedemo.enums.PaymentStatus;
-import org.com.statemachinedemo.listener.OrderTransitionListener;
+import org.com.statemachinedemo.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.annotation.OnTransition;
 import org.springframework.statemachine.annotation.WithStateMachine;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 @Component
 @WithStateMachine
 public class OrderAction {
+    @Autowired
+    private ProductService productService;
 
     private static final Logger logger = LoggerFactory.getLogger(OrderAction.class);
     // 支付成功处理
@@ -23,6 +26,7 @@ public class OrderAction {
         Order order = (Order) context.getMessage().getHeaders().get("order");
         if (order != null) {
             order.setPaymentStatus(PaymentStatus.SUCCESS);
+            productService.saleProduct(order.getProductId(), order.getQuantity().intValue());
         }
         logger.info("订单-{} 支付确认成功，订单已支付。", order.getOrderId());
     }

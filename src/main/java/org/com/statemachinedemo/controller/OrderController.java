@@ -47,8 +47,8 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping("/create")
-    public Order create(@RequestParam BigDecimal price) {
-        return orderService.createOrder(price);
+    public Order create(@RequestParam Long productId, @RequestParam Long quantity) {
+        return orderService.createOrder(productId, quantity);
     }
 
     @GetMapping("/get/{orderId}")

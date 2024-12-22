@@ -1,7 +1,7 @@
 package org.com.statemachinedemo.service;
 
-import org.com.statemachinedemo.actions.OrderAction;
 import org.com.statemachinedemo.entity.Order;
+import org.com.statemachinedemo.entity.Product;
 import org.com.statemachinedemo.enums.OrderEvent;
 import org.com.statemachinedemo.enums.OrderState;
 import org.com.statemachinedemo.enums.PaymentStatus;
@@ -21,6 +21,8 @@ import java.util.UUID;
 public class OrderService {
     @Autowired
     private StateMachine<OrderState, OrderEvent> stateMachine;
+    @Autowired
+    private ProductService productService;
     private final Map<String, Order> orderRepository = new HashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
@@ -30,8 +32,13 @@ public class OrderService {
     }
 
     // 创建订单并初始化状态机
-    public Order createOrder(BigDecimal totalAmount) {
-        Order order = new Order(UUID.randomUUID().toString(), totalAmount);
+    public Order createOrder(Long productId, Long quantity) {
+        Product product = productService.getProductById(productId);
+        if (product == null || product.getStock() < quantity) {
+            throw new IllegalArgumentException("Product not available or insufficient stock");
+        }
+        BigDecimal totalAmount = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+        Order order = new Order(UUID.randomUUID().toString(), productId, quantity, totalAmount);
         orderRepository.put(order.getOrderId(), order);
         // 启动状态机
         stateMachine.start();
